@@ -216,6 +216,7 @@ compras) la conversión cae a 8%, y cuando compras y vistas crecen juntas se
 mantiene estable alrededor del 17-22%.
 
 **¿Cuántos carritos se abandonan y qué campaña propondrían para recuperarlos?**
+
 En un solo batch de 30 segundos se detectaron **19 carritos abandonados**
 (usuarios distintos, varios repitiendo con más de un producto abandonado,
 como U009 y U040). Extrapolando, son decenas de carritos abandonados por
