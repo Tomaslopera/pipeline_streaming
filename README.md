@@ -1,15 +1,13 @@
-# Pipeline de streaming en tiempo real — Caso B: E-commerce en vivo
+# Pipeline de Streaming en tiempo real
 
-**Big Data — Trabajo 3 (tercera nota)**
 **Pareja:** Tomás Lopera y Pedro Sierra
-**Caso elegido:** Caso B — Analítica de e-commerce en vivo (topic `ecommerce`)
+**Caso elegido:** Caso B | Analítica de e-commerce en vivo (topic `ecommerce`)
 
 Pipeline de streaming con **Kafka + Spark Structured Streaming** que detecta
 en vivo 3 patrones de comportamiento de usuarios en una tienda online:
 productos más vistos por ventana, tasa de conversión vista→compra, y
 carritos abandonados.
 
----
 
 ## Cómo funciona el detector
 
@@ -60,7 +58,7 @@ corre fuera de Docker es el productor (`productor_ecommerce.py`), porque
 viene con `localhost:9092` fijo en el código y no se puede modificar — por
 eso Kafka expone ese puerto al host.
 
-### 0. Requisitos
+### Requisitos
 - Docker Desktop instalado y corriendo (`docker info` no debe dar error).
 - Python 3 en el host con `pip install -r requirements.txt` (solo para el productor).
 
@@ -81,13 +79,13 @@ Revisa que el topic quedó creado:
 docker compose logs kafka-init
 ```
 
-### 2. Instalar dependencias del productor (una sola vez, en el host)
+### 2. Instalar dependencias del productor
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Arrancar el productor (terminal 1, en el host)
+### 3. Arrancar el productor
 
 ```bash
 python3 productor_ecommerce.py
@@ -95,7 +93,7 @@ python3 productor_ecommerce.py
 
 Déjalo corriendo. Va a imprimir "tick N: eventos enviados" cada segundo.
 
-### 4. Arrancar el detector (terminal 2)
+### 4. Arrancar el detector
 
 ```bash
 ./run_detector.sh
@@ -200,11 +198,13 @@ varias veces con números crecientes):
 ## Preguntas de negocio
 
 **¿Cuál es el producto estrella?**
-**P01** — aparece en el puesto 1 del ranking de la Regla 1 en la gran mayoría
+
+El producto **P01** aparece en el puesto 1 del ranking en la Regla 1 en la gran mayoría
 de las ventanas observadas (seguido de cerca por P02), tanto en vistas como
 en volumen dentro de las ventanas de conversión más altas.
 
 **¿La tasa de conversión es sana?**
+
 En la corrida se observaron tasas entre **11% y 28%** por ventana, con un
 promedio cercano al **17-18%**. Es mucho más alta que el benchmark real de
 e-commerce (2-5%), pero es un resultado esperado: el productor genera los
@@ -225,46 +225,6 @@ quedó pendiente; para los productos que más se repiten en los abandonos
 (P01, P03, P04 en nuestra muestra) un incentivo adicional — descuento del
 10% o envío gratis — ya que son también los productos más vistos, así que
 recuperar ese carrito tiene el mayor impacto en ingreso.
-
----
-
-## Retos técnicos
-
-- **Doble listener de Kafka:** para que el productor (en el host, apuntando
-  a `localhost:9092` fijo) y Spark (dentro de la red de Docker, apuntando a
-  `kafka:9092`) pudieran conectarse al mismo broker, hubo que configurar tres
-  listeners (interno, controller KRaft y externo) con
-  `KAFKA_CFG_ADVERTISED_LISTENERS` distinto para cada uno.
-- **Versión del conector `spark-sql-kafka-0-10`:** tiene que coincidir
-  exactamente con la versión de Spark del contenedor (`3.5.3`); una versión
-  distinta falla al resolver dependencias transitivas vía `--packages`.
-- **`outputMode` en el join de carritos abandonados:** un `LEFT OUTER JOIN`
-  entre dos streams solo admite `append`, no `update` — hubo que entender por
-  qué el resultado tarda en aparecer (es el watermark esperando a estar
-  seguro de que no llega una compra tardía, no un error).
-- **`foreachBatch` para el ranking:** Structured Streaming no permite
-  `ORDER BY ... LIMIT` directo sobre un stream; hubo que usar `foreachBatch`
-  para convertir cada micro-batch en un DataFrame estático y ahí sí ordenar
-  y tomar el top 5 por ventana.
-- **Literal de tipo struct en `foreachBatch`:** una primera versión de la
-  Regla 1 intentaba filtrar `df.filter(col("window") == w["window"])` dentro
-  del `foreachBatch`, comparando la columna struct `window` contra un valor
-  ya recolectado. Spark no puede construir ese literal
-  (`SparkRuntimeException: UNSUPPORTED_FEATURE.LITERAL_TYPE`) y las 3
-  queries morían al primer micro-batch. Se resolvió agrupando las filas ya
-  recolectadas en Python puro (un diccionario por ventana) en vez de volver
-  a consultarle a Spark.
-- **Imagen de Docker Hub descontinuada:** `bitnami/kafka` y `bitnami/spark`
-  ya no tienen tags públicos (Bitnami movió su catálogo a un registro de
-  pago); hubo que usar la organización `bitnamilegacy` en su lugar.
-- **Ruido de `spark.sql.shuffle.partitions`:** por defecto Spark usa 200
-  particiones para el estado de los joins/agregaciones. En un solo
-  contenedor local eso generó 200 "state stores" que imprimían una línea de
-  `WARN` cada uno por batch, inundando la consola y escondiendo las alertas
-  `[REGLA ...]`. Se bajó a `spark.sql.shuffle.partitions=4`, suficiente para
-  los 3 topics/particiones del ejercicio.
-
----
 
 ## Evidencia de ejecución en vivo
 
