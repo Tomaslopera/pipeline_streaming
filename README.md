@@ -8,8 +8,29 @@ en vivo 3 patrones de comportamiento de usuarios en una tienda online
 (topic `ecommerce`): productos más vistos por ventana, tasa de conversión
 vista→compra, y carritos abandonados.
 
-El informe completo (arquitectura, resultados, preguntas de negocio, retos
-técnicos y evidencia de ejecución) está en [`informe.md`](informe.md).
+El informe completo (arquitectura, resultados, preguntas de negocio y retos
+técnicos) está en [`informe.md`](informe.md).
+
+---
+
+## Evidencia de ejecución en vivo
+
+**Detector alertando — Reglas 1 y 2 (productos vistos y conversión):**
+
+![Regla 1 y Regla 2 en vivo](images/regla1-2.png)
+
+**Detector alertando — Regla 3 (carritos abandonados):**
+
+![Regla 3 en vivo](images/regla3.png)
+
+**Productor enviando eventos al topic `ecommerce` (terminal paralela):**
+
+![Productor corriendo](images/tickets.png)
+
+**Contenedores de Docker arriba, topic creado con 3 particiones, y offsets
+subiendo (evidencia de que Kafka está recibiendo mensajes reales):**
+
+![Docker, topic y offsets](images/docker.png)
 
 ---
 
