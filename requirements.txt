@@ -1,0 +1,3 @@
+# Solo para correr el productor (productor_ecommerce.py) en el host.
+# El detector corre dentro del contenedor "spark" (bitnami/spark), no necesita esto.
+kafka-python==2.0.2
