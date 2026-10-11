@@ -210,7 +210,7 @@ promedio cercano al **17-18%**. Es mucho más alta que el benchmark real de
 e-commerce (2-5%), pero es un resultado esperado: el productor genera los
 eventos con una distribución fija (~65% vistas, ~23% carritos, ~12%
 compras), no con el comportamiento real de usuarios. Lo que sí valida la
-regla es que el cálculo responde correctamente ventana a ventana — cuando
+regla es que el cálculo responde correctamente ventana a ventana, cuando
 suben las vistas con pocas compras (ventana 16:04-16:05: 50 vistas / 4
 compras) la conversión cae a 8%, y cuando compras y vistas crecen juntas se
 mantiene estable alrededor del 17-22%.
@@ -222,9 +222,9 @@ En un solo batch de 30 segundos se detectaron **19 carritos abandonados**
 como U009 y U040). Extrapolando, son decenas de carritos abandonados por
 minuto. Propuesta de campaña: un recordatorio automático (push o email) a
 los 2-3 minutos de agregar al carrito sin compra, con el producto que
-quedó pendiente; para los productos que más se repiten en los abandonos
-(P01, P03, P04 en nuestra muestra) un incentivo adicional — descuento del
-10% o envío gratis — ya que son también los productos más vistos, así que
+quedó pendiente. Para los productos que más se repiten en los abandonos
+(P01, P03, P04 en nuestra muestra) un incentivo adicional como descuento del
+10% o envío gratis, ya que son también los productos más vistos, así que
 recuperar ese carrito tiene el mayor impacto en ingreso.
 
 ## Evidencia de ejecución en vivo
